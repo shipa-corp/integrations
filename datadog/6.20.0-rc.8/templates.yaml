@@ -582,29 +582,29 @@ spec:
         - name: sysprobe-config
           configMap:
             name: {{ .AgentName }}-system-probe-config
-      - name: {{ .AgentName }}-security
-      configMap:
-        name: {{ .AgentName }}-security
-      - hostPath:
-      path: /var/lib/kubelet/seccomp
-      name: seccomp-root
-      - hostPath:
-          path: /sys/kernel/debug
-        name: debugfs
-      - name: sysprobe-socket-dir
-        emptyDir: {}
-      - hostPath:
-          path: /etc/passwd
-        name: passwd
-      - hostPath:
-          path: "/var/lib/datadog-agent/logs"
-        name: pointerdir
-      - hostPath:
-          path: /var/log/pods
-        name: logpodpath
-      - hostPath:
-          path: /var/lib/docker/containers
-        name: logdockercontainerpath
+        - name: {{ .AgentName }}-security
+          configMap:
+            name: {{ .AgentName }}-security
+        - hostPath:
+            path: /var/lib/kubelet/seccomp
+          name: seccomp-root
+        - hostPath:
+            path: /sys/kernel/debug
+          name: debugfs
+        - name: sysprobe-socket-dir
+          emptyDir: {}
+        - hostPath:
+            path: /etc/passwd
+          name: passwd
+        - hostPath:
+            path: "/var/lib/datadog-agent/logs"
+          name: pointerdir
+        - hostPath:
+            path: /var/log/pods
+          name: logpodpath
+        - hostPath:
+            path: /var/lib/docker/containers
+          name: logdockercontainerpath
       tolerations:
       affinity: null
       serviceAccountName: "default"
