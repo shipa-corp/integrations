@@ -91,11 +91,11 @@ kind: Secret
 type: Opaque
 metadata:
   name: {{ .SecretName }}
-  namespace: {{ $.Namespace }}
+  namespace: {{ .Namespace }}
   labels:
     shipa.io/is-shipa-datadog: "true"
 data:
-  api-key: {{ $.Key }}
+  api-key: {{ .Key }}
 ---
 # APP Key
 apiVersion: v1
@@ -103,18 +103,18 @@ kind: Secret
 type: Opaque
 metadata:
   name: {{ .AgentName }}
-  namespace: {{ $.Namespace }}
+  namespace: {{ .Namespace }}
   labels:
     shipa.io/is-shipa-datadog: "true"
 data:
-  api-key: {{ $.Key }}
+  api-key: {{ .Key }}
 ---
 # Source: datadog/templates/system-probe-configmap.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ .AgentName }}-system-probe-config
-  namespace: {{ $.Namespace }}
+  namespace: {{ .Namespace }}
   labels:
     shipa.io/is-shipa-datadog: "true"
 data:
@@ -131,7 +131,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ .AgentName }}-security
-  namespace: {{ $.Namespace }}
+  namespace: {{ .Namespace }}
   labels:
     shipa.io/is-shipa-datadog: "true"
 data:
@@ -316,7 +316,7 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: {{ .AgentName }}
-  namespace: {{ $.Namespace }}
+  namespace: {{ .Namespace }}
   labels:
     shipa.io/is-shipa-datadog: "true"
 spec:
