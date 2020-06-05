@@ -13,7 +13,7 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: kube-state-metrics
-    namespace: kube-system
+    namespace: {{ .Namespace }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -133,7 +133,7 @@ metadata:
     app.kubernetes.io/name: kube-state-metrics
     app.kubernetes.io/version: v1.9.7
   name: kube-state-metrics
-  namespace: kube-system
+  namespace: {{ .Namespace }}
 spec:
   replicas: 1
   selector:
@@ -176,7 +176,7 @@ metadata:
     app.kubernetes.io/name: kube-state-metrics
     app.kubernetes.io/version: v1.9.7
   name: kube-state-metrics
-  namespace: kube-system
+  namespace: {{ .Namespace }}
 ---
 apiVersion: v1
 kind: Service
@@ -185,7 +185,7 @@ metadata:
     app.kubernetes.io/name: kube-state-metrics
     app.kubernetes.io/version: v1.9.7
   name: kube-state-metrics
-  namespace: kube-system
+  namespace: {{ .Namespace }}
 spec:
   clusterIP: None
   ports:
@@ -202,7 +202,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: newrelic
-  namespace: default
+  namespace: {{ .Namespace }}
 automountServiceAccountToken: true
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -234,13 +234,13 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: newrelic
-  namespace: default
+  namespace: {{ .Namespace }}
 ---
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: newrelic-infra
-  namespace: default
+  namespace: {{ .Namespace }}
   labels:
     app: newrelic-infra
 spec:
@@ -351,7 +351,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: nri-default-integration-cfg # integrations config provided by default
-  namespace: default
+  namespace: {{ .Namespace }}
 data:
   nri-kubernetes-config.yml: |
     integration_name: com.newrelic.kubernetes
@@ -363,4 +363,4 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: nri-integration-cfg # aimed to be safely overridden by users
-  namespace: default
+  namespace: {{ .Namespace }}
