@@ -1,0 +1,115 @@
+apiVersion: v1
+kind: Secret
+type: Opaque
+metadata:
+  name: {{ .SecretName }}
+  namespace: {{ .Namespace }}
+  labels:
+    shipa.io/is-shipa-logz.io: "true"
+data:
+  logzio-log-shipping-token: {{ .Token }}
+  logzio-log-listener: {{ .Listener }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Name }}
+  namespace: {{ .Namespace }}
+
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: {{ .Name }}
+  namespace: {{ .Namespace }}
+  labels:
+    shipa.io/is-shipa-logz.io: "true"
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+      - namespaces
+    verbs:
+      - get
+      - list
+      - watch
+
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: {{ .Name }}
+  labels:
+    shipa.io/is-shipa-logz.io: "true"
+roleRef:
+  kind: ClusterRole
+  name: {{ .Name }}
+  apiGroup: rbac.authorization.k8s.io
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Name }}
+    namespace: {{ .Namespace }}
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ .Name }}-logzio
+  namespace: {{ .Namespace }}
+  labels:
+    k8s-app: {{ .Name }}-logzio
+    version: v1
+    shipa.io/is-shipa-logz.io: "true"
+spec:
+  selector:
+    matchLabels:
+      k8s-app: {{ .Name }}-logzio
+  template:
+    metadata:
+      labels:
+        k8s-app: {{ .Name }}-logzio
+        version: v1
+    spec:
+      serviceAccount: {{ .Name }}
+      serviceAccountName: {{ .Name }}
+      tolerations:
+        - key: node-role.kubernetes.io/master
+          effect: NoSchedule
+      containers:
+        - name: {{ .Name }}
+          image: logzio/logzio-k8s:1.1.1
+          env:
+            - name: LOGZIO_LOG_SHIPPING_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: logzio-logs-secret
+                  key: logzio-log-shipping-token
+            - name: LOGZIO_LOG_LISTENER
+              valueFrom:
+                secretKeyRef:
+                  name: logzio-logs-secret
+                  key: logzio-log-listener
+            - name: FLUENTD_SYSTEMD_CONF
+              value: "disable"
+            - name: FLUENTD_PROMETHEUS_CONF
+              value: "disable"
+          resources:
+            limits:
+              memory: 200Mi
+            requests:
+              cpu: 100m
+              memory: 200Mi
+          volumeMounts:
+            - name: varlog
+              mountPath: /var/log
+            - name: varlibdockercontainers
+              mountPath: /var/lib/docker/containers
+              readOnly: true
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - name: varlog
+          hostPath:
+            path: /var/log
+        - name: varlibdockercontainers
+          hostPath:
+            path: /var/lib/docker/containers
